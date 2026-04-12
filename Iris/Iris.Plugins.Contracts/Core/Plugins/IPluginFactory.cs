@@ -1,7 +1,7 @@
 namespace Iris.Core.Plugins;
 
 /// <summary>
-/// Factory for creating plugin instances.
+/// Factory for creating and registering plugin instances.
 /// </summary>
 /// <remarks>
 /// Connector types model domain integrations (what you talk to: ASTM, LIMS, OPC-UA).
@@ -9,6 +9,12 @@ namespace Iris.Core.Plugins;
 /// </remarks>
 public interface IPluginFactory
 {
+    /// <summary>Registers a connector type by name.</summary>
+    void RegisterConnectorType(string name, Type type);
+
+    /// <summary>Registers a transport type by name.</summary>
+    void RegisterTransportType(string name, Type type);
+
     /// <summary>
     /// Create a connector instance by registered type name.
     /// Connectors model domain integrations (e.g. ASTM, LIMS, OPC-UA).

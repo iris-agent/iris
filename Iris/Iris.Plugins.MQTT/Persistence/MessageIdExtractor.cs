@@ -1,7 +1,8 @@
 using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 
-namespace Iris.Persistence;
+namespace Iris.Plugins.MQTT.Persistence;
 
 /// <summary>
 /// Application-level message identification for MQTT deduplication.

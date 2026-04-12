@@ -1,10 +1,8 @@
-using Iris.Configuration;
 using Iris.Core;
 using Iris.Core.Plugins;
 using Iris.Plugins.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Iris.Plugins;
 
@@ -24,7 +22,7 @@ public sealed class BuiltInPluginActivator : IPluginActivator
     }
 
     public async Task ActivatePluginsAsync(
-        UnifiedPluginFactory factory,
+        IPluginFactory factory,
         IPluginRegistry registry,
         IServiceProvider services,
         CancellationToken cancellationToken)
@@ -34,34 +32,7 @@ public sealed class BuiltInPluginActivator : IPluginActivator
         {
             var type = child["type"] ?? child.Key;
 
-            ITransport? transport = null;
-            var transportSection = child.GetSection("Transport");
-            if (transportSection.Exists())
-            {
-                var tType = transportSection["type"] ?? "Unknown";
-                if (string.Equals(tType, "Mqtt", StringComparison.OrdinalIgnoreCase))
-                {
-                    var options = transportSection.Get<MqttOptions>() ?? new MqttOptions();
-                    options.Name = child.Key;
-
-                    var configuredDirection = transportSection["direction"];
-                    if (!string.IsNullOrWhiteSpace(configuredDirection)
-                        && Enum.TryParse<TransportDirection>(configuredDirection, true, out var parsedDirection))
-                    {
-                        options.DirectionEnum = parsedDirection;
-                    }
-
-                    if (options.DirectionEnum == TransportDirection.Send)
-                    {
-                        options.Enabled = false;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(options.BrokerHost))
-                    {
-                        transport = factory.CreateTransport("Mqtt", services, options);
-                    }
-                }
-            }
+            var transport = CreateTransport(child.GetSection("transport"), factory, services, child.Key);
 
             if (string.Equals(type, "FilesystemWatcher", StringComparison.OrdinalIgnoreCase))
             {
@@ -69,7 +40,7 @@ public sealed class BuiltInPluginActivator : IPluginActivator
                 options.Name = child.Key;
                 if (options.Enabled)
                 {
-                    var connector = factory.CreateConnector("FilesystemWatcher", services, options, transport!);
+                    var connector = factory.CreateConnector("FilesystemWatcher", services, options, transport);
                     if (connector != null) registry.RegisterConnector(connector);
                 }
             }
@@ -79,12 +50,25 @@ public sealed class BuiltInPluginActivator : IPluginActivator
                 options.Name = child.Key;
                 if (!string.IsNullOrWhiteSpace(options.OutputPath))
                 {
-                    var connector = factory.CreateConnector("FileWriter", services, options, transport!);
+                    var connector = factory.CreateConnector("FileWriter", services, options, transport);
                     if (connector != null) registry.RegisterConnector(connector);
                 }
             }
         }
 
         await Task.CompletedTask;
+    }
+
+    private ITransport? CreateTransport(IConfigurationSection section, IPluginFactory factory, IServiceProvider services, string connectorName)
+    {
+        var transportType = section["type"];
+        if (string.IsNullOrWhiteSpace(transportType))
+            return null;
+
+        var transport = factory.CreateTransport(transportType, services, section);
+        if (transport == null)
+            _logger.LogWarning("Could not create transport of type '{TransportType}' for connector '{ConnectorName}'.", transportType, connectorName);
+
+        return transport;
     }
 }

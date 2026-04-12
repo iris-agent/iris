@@ -1,6 +1,5 @@
 using Iris.Core.Plugins;
 using Iris.Plugins.Connectors;
-using Iris.Plugins.Transports;
 
 namespace Iris.Plugins;
 
@@ -14,13 +13,10 @@ namespace Iris.Plugins;
 /// </remarks>
 public sealed class BuiltInPluginRegistrar : IPluginRegistrar
 {
-    public void RegisterPlugins(UnifiedPluginFactory factory)
+    public void RegisterPlugins(IPluginFactory factory)
     {
         // Connectors — domain integrations (what the agent talks to)
         factory.RegisterConnectorType("FilesystemWatcher", typeof(FilesystemWatcherConnector));
         factory.RegisterConnectorType("FileWriter",    typeof(FileWriterConnector));
-
-        // Transports — protocol channels (how data moves)
-        factory.RegisterTransportType("Mqtt",          typeof(MqttTransport));
     }
 }

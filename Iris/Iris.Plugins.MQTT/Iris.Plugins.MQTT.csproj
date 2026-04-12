@@ -4,22 +4,20 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <!-- Write private NuGet deps (MQTTnet, SQLite) to the output folder so we can
-         copy them into this plugin's own subfolder under plugins\. Shared host
-         assemblies (Microsoft.Extensions.*, Iris.dll, etc.) are excluded from the
-         copy via the target below. -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Iris.Plugins.Contracts\Iris.Plugins.Contracts.csproj" Private="false" />
+    <ProjectReference Include="..\Iris.Core\Iris.Core.csproj" Private="false" />
   </ItemGroup>
 
-  <!-- Copy ONLY the assemblies that are private to this plugin (not already present in the
-       host output directory) into plugins\$(AssemblyName)\. PluginLoadContext resolves
-       MQTTnet and SQLite from this plugin-specific folder; all shared types
-       (Microsoft.Extensions.*, Iris.dll, …) fall through to the default context so
-       their type identities stay consistent with the DI container. -->
+  <ItemGroup>
+    <PackageReference Include="MQTTnet" Version="4.3.7.1207" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.5" />
+  </ItemGroup>
+
   <Target Name="CopyPluginsToOutput" AfterTargets="Build">
     <PropertyGroup>
       <_HostOutputDir>$(MSBuildThisFileDirectory)..\Iris\bin\$(Configuration)\net9.0\</_HostOutputDir>
@@ -31,19 +29,12 @@
     <ItemGroup>
       <_StaleSharedPluginDlls Include="$(_PluginDestDir)Iris.Core.dll" />
       <_StaleSharedPluginDlls Include="$(_PluginDestDir)Iris.Plugins.Contracts.dll" />
-      <_StaleSharedPluginDlls Include="$(_PluginDestDir)Microsoft.Data.Sqlite.dll" />
     </ItemGroup>
-
     <Delete Files="@(_StaleSharedPluginDlls)" TreatErrorsAsWarnings="true" />
 
-    <!-- Collect every DLL built by this project … -->
     <ItemGroup>
       <_AllPluginDlls Include="$(OutputPath)*.dll" />
     </ItemGroup>
-
-    <!-- … then keep only those whose filename does NOT already exist in the host root.
-         This leaves just the plugin-private assemblies that should live in this
-         plugin's dedicated subfolder. -->
     <ItemGroup>
       <_PrivatePluginDlls Include="@(_AllPluginDlls)" Condition="!Exists('$(_HostOutputDir)%(Filename)%(Extension)')" />
       <_LegacyPluginRootFiles Include="$(_PluginRootDir)*.*" />
@@ -56,21 +47,12 @@
     <RemoveDir Directories="$(_PluginRootDir)runtimes" ContinueOnError="WarnAndContinue" />
 
     <Copy SourceFiles="@(_PrivatePluginDlls)" DestinationFolder="$(_PluginDestDir)" SkipUnchangedFiles="true" />
-
-    <!-- deps.json is needed by AssemblyDependencyResolver inside PluginLoadContext -->
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFolder="$(_PluginDestDir)" SkipUnchangedFiles="true" />
 
-    <!-- Native runtime binaries (e_sqlite3, etc.) -->
     <ItemGroup>
       <_RuntimeFiles Include="$(OutputPath)runtimes\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(_RuntimeFiles)" DestinationFiles="@(_RuntimeFiles->'$(_PluginDestDir)runtimes\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
-  </ItemGroup>
 
 </Project>

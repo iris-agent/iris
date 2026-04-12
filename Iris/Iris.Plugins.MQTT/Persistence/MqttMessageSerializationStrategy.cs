@@ -1,6 +1,7 @@
+using Iris.Persistence;
 using Microsoft.Data.Sqlite;
 
-namespace Iris.Persistence;
+namespace Iris.Plugins.MQTT.Persistence;
 
 /// <summary>
 /// Serialization strategy for MQTT messages.
@@ -55,17 +56,17 @@ public sealed class MqttMessageSerializationStrategy : IMessageSerializationStra
             ReceivedAt = DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64(reader.GetOrdinal("received_at"))),
             Status = (MessageStatus)reader.GetInt32(reader.GetOrdinal("status")),
             AttemptCount = reader.GetInt32(reader.GetOrdinal("attempt_count")),
-            LastAttemptAt = reader.IsDBNull(reader.GetOrdinal("last_attempt_at")) 
-                ? null 
+            LastAttemptAt = reader.IsDBNull(reader.GetOrdinal("last_attempt_at"))
+                ? null
                 : DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64(reader.GetOrdinal("last_attempt_at"))),
-            ErrorMessage = reader.IsDBNull(reader.GetOrdinal("error_message")) 
-                ? null 
+            ErrorMessage = reader.IsDBNull(reader.GetOrdinal("error_message"))
+                ? null
                 : reader.GetString(reader.GetOrdinal("error_message")),
-            MetadataJson = reader.IsDBNull(reader.GetOrdinal("metadata_json")) 
-                ? null 
+            MetadataJson = reader.IsDBNull(reader.GetOrdinal("metadata_json"))
+                ? null
                 : reader.GetString(reader.GetOrdinal("metadata_json")),
-            ProcessedAt = reader.IsDBNull(reader.GetOrdinal("processed_at")) 
-                ? null 
+            ProcessedAt = reader.IsDBNull(reader.GetOrdinal("processed_at"))
+                ? null
                 : DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64(reader.GetOrdinal("processed_at")))
         };
     }

@@ -7,7 +7,7 @@ namespace Iris.Core.Plugins;
 /// Plugins fall into two categories:
 /// <list type="bullet">
 ///   <item><term>Connector</term><description>Encapsulates <em>what</em> system is being integrated (ASTM, LIMS, OPC-UA). Originates messages.</description></item>
-///   <item><term>Transport</term><description>Encapsulates <em>how</em> data moves (MQTT, HTTP, Kafka). Delivers messages.</description></item>
+///   <item><term>Transport</term><description>Encapsulates <em>how</em> data moves (MQTT, HTTP, Kafka). Delivers messages over a protocol channel.</description></item>
 /// </list>
 /// </remarks>
 public interface IPluginRegistry
@@ -30,9 +30,6 @@ public interface IPluginRegistry
     /// <summary>Get all registered transports.</summary>
     IEnumerable<ITransport> GetTransports();
 
-    /// <summary>Get a specific transport by name.</summary>
+    /// <summary>Get a transport by name.</summary>
     ITransport? GetTransport(string name);
-
-    /// <summary>Get metadata for all registered plugins.</summary>
-    IEnumerable<IPluginMetadata> GetAllPluginMetadata();
 }

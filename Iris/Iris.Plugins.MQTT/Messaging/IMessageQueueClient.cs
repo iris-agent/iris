@@ -1,8 +1,7 @@
-using System.Threading;
-using System.Threading.Tasks;
+using Iris.Core;
 using Iris.Core;
 
-namespace Iris.Plugins.Messaging;
+namespace Iris.Plugins.MQTT.Messaging;
 
 /// <summary>
 /// Abstraction for a message queue client (SQS, MQTT, etc.).

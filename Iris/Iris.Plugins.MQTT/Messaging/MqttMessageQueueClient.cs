@@ -1,15 +1,12 @@
-using System;
 using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Iris.Core;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
 
-namespace Iris.Plugins.Messaging;
+namespace Iris.Plugins.MQTT.Messaging;
 
 /// <summary>
 /// Implements message sending and receiving using MQTT.
@@ -61,8 +58,7 @@ public sealed class MqttMessageQueueClient : IDisposable
                     _logger.LogInformation("  - {Address} (Family: {AddressFamily})", addr, addr.AddressFamily);
                 }
 
-                // Attempt to identify the actual connected IP by querying active connections
-                await Task.Delay(100); // Brief delay to ensure connection is established
+                await Task.Delay(100);
                 _connectedToIpAddress = await GetConnectedEndpointAsync();
                 if (_connectedToIpAddress != null)
                 {
@@ -77,8 +73,8 @@ public sealed class MqttMessageQueueClient : IDisposable
 
         _mqttClient.DisconnectedAsync += async e =>
         {
-            var connectionDuration = _lastConnectionTime != default 
-                ? DateTime.UtcNow - _lastConnectionTime 
+            var connectionDuration = _lastConnectionTime != default
+                ? DateTime.UtcNow - _lastConnectionTime
                 : TimeSpan.Zero;
 
             if (e.Exception != null)
@@ -125,7 +121,7 @@ public sealed class MqttMessageQueueClient : IDisposable
         }
         else
         {
-            _logger.LogError("Failed to connect to MQTT broker. Result: {ResultCode}, Reason: {Reason}", 
+            _logger.LogError("Failed to connect to MQTT broker. Result: {ResultCode}, Reason: {Reason}",
                 result.ResultCode, result.ReasonString);
             throw new Exception($"MQTT connection failed: {result.ResultCode} - {result.ReasonString}");
         }
@@ -155,7 +151,7 @@ public sealed class MqttMessageQueueClient : IDisposable
                 try
                 {
                     var delay = TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 60));
-                    _logger.LogInformation("Reconnection attempt {Attempt}/{MaxRetries} in {Delay} seconds...", 
+                    _logger.LogInformation("Reconnection attempt {Attempt}/{MaxRetries} in {Delay} seconds...",
                         attempt, maxRetries, delay.TotalSeconds);
                     await Task.Delay(delay, cancellationToken);
 
@@ -167,7 +163,7 @@ public sealed class MqttMessageQueueClient : IDisposable
                     }
                     else
                     {
-                        _logger.LogWarning("Reconnection attempt {Attempt} failed: {ResultCode}", 
+                        _logger.LogWarning("Reconnection attempt {Attempt} failed: {ResultCode}",
                             attempt, result.ResultCode);
                     }
                 }
@@ -222,8 +218,8 @@ public sealed class MqttMessageQueueClient : IDisposable
             {
                 var payloadBytes = e.ApplicationMessage.Payload ?? Array.Empty<byte>();
                 var body = Encoding.UTF8.GetString(payloadBytes);
-                var msg = new DataMessage 
-                { 
+                var msg = new DataMessage
+                {
                     Body = body,
                     Metadata = new Dictionary<string, string>
                     {
@@ -236,14 +232,13 @@ public sealed class MqttMessageQueueClient : IDisposable
                     }
                 };
 
-                // Add correlation data if present (MQTT 5.0)
                 if (e.ApplicationMessage.CorrelationData?.Length > 0)
                 {
                     msg.Metadata["MqttCorrelationData"] = Convert.ToBase64String(e.ApplicationMessage.CorrelationData);
                 }
 
-                _logger.LogInformation("Received message from topic {ReceivedTopic} (subscribed to {SubscribedTopic}), QoS: {QoS}, PacketId: {PacketId}, Dup: {Dup}, Length: {Length} bytes", 
-                    e.ApplicationMessage.Topic, _topic, e.ApplicationMessage.QualityOfServiceLevel, 
+                _logger.LogInformation("Received message from topic {ReceivedTopic} (subscribed to {SubscribedTopic}), QoS: {QoS}, PacketId: {PacketId}, Dup: {Dup}, Length: {Length} bytes",
+                    e.ApplicationMessage.Topic, _topic, e.ApplicationMessage.QualityOfServiceLevel,
                     e.PacketIdentifier, e.ApplicationMessage.Dup, payloadBytes.Length);
                 await onMessage(msg);
             }
@@ -265,12 +260,12 @@ public sealed class MqttMessageQueueClient : IDisposable
                 subscription.ResultCode == MqttClientSubscribeResultCode.GrantedQoS1 ||
                 subscription.ResultCode == MqttClientSubscribeResultCode.GrantedQoS2)
             {
-                _logger.LogInformation("Successfully subscribed to topic filter: {TopicFilter} with QoS: {ResultCode}", 
+                _logger.LogInformation("Successfully subscribed to topic filter: {TopicFilter} with QoS: {ResultCode}",
                     subscription.TopicFilter.Topic, subscription.ResultCode);
             }
             else
             {
-                _logger.LogError("Failed to subscribe to topic filter: {TopicFilter}. Result: {ResultCode}", 
+                _logger.LogError("Failed to subscribe to topic filter: {TopicFilter}. Result: {ResultCode}",
                     subscription.TopicFilter.Topic, subscription.ResultCode);
                 throw new Exception($"MQTT subscription failed: {subscription.ResultCode}");
             }
@@ -333,13 +328,11 @@ public sealed class MqttMessageQueueClient : IDisposable
             var output = await process.StandardOutput.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            // Parse netstat output to find ESTABLISHED connections to broker port from our process
             var lines = output.Split('\n');
             foreach (var line in lines)
             {
                 if (line.Contains("ESTABLISHED") && line.Contains($":{_brokerPort}") && line.Contains(processId.ToString()))
                 {
-                    // Extract remote IP from netstat line format: "TCP    LOCAL_IP:PORT    REMOTE_IP:PORT    ESTABLISHED    PID"
                     var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 3)
                     {

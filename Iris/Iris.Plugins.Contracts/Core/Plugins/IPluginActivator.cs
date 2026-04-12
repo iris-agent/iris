@@ -6,5 +6,5 @@ namespace Iris.Core.Plugins;
 /// </summary>
 public interface IPluginActivator
 {
-    Task ActivatePluginsAsync(UnifiedPluginFactory factory, IPluginRegistry registry, IServiceProvider services, CancellationToken cancellationToken);
+    Task ActivatePluginsAsync(IPluginFactory factory, IPluginRegistry registry, IServiceProvider services, CancellationToken cancellationToken);
 }

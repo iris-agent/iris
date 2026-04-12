@@ -5,5 +5,5 @@ namespace Iris.Core.Plugins;
 /// </summary>
 public interface IPluginRegistrar
 {
-    void RegisterPlugins(UnifiedPluginFactory factory);
+    void RegisterPlugins(IPluginFactory factory);
 }

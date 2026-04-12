@@ -23,7 +23,7 @@ public sealed class FileWriterConnector : IConnector
     public ITransport? Transport { get; }
     public event Func<DataMessage, Task>? MessageReceived;
 
-    public FileWriterConnector(FileWriterOptions options, ITransport? transport, ILogger<FileWriterConnector> logger)
+    public FileWriterConnector(FileWriterOptions options, ILogger<FileWriterConnector> logger, ITransport? transport)
     {
         _options = options;
         Transport = transport;

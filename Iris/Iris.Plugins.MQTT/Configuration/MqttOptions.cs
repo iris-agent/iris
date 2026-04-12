@@ -1,8 +1,7 @@
 using Iris.Persistence;
-
 using Iris.Persistence;
 
-namespace Iris.Plugins.Configuration;
+namespace Iris.Plugins.MQTT.Configuration;
 
 public enum TransportDirection
 {
@@ -23,10 +22,10 @@ public sealed class MqttOptions
     [System.Text.Json.Serialization.JsonIgnore]
     public TransportDirection DirectionEnum { get; set; } = TransportDirection.Both;
 
-    public string Direction 
-    { 
+    public string Direction
+    {
         get => DirectionEnum.ToString();
-        set 
+        set
         {
             if (Enum.TryParse<TransportDirection>(value?.Trim(), true, out var d))
             {

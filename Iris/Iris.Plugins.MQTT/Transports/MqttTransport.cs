@@ -1,16 +1,13 @@
-using System;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Iris.Core;
 using Iris.Core.Plugins;
 using Iris.Persistence;
-using Iris.Plugins.Configuration;
-using Iris.Plugins.Messaging;
+using Iris.Plugins.MQTT.Configuration;
+using Iris.Plugins.MQTT.Messaging;
+using Iris.Plugins.MQTT.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Iris.Plugins.Transports;
+namespace Iris.Plugins.MQTT.Transports;
 
 /// <summary>
 /// A unified MQTT transport that can both publish and subscribe to MQTT topics.
@@ -32,6 +29,14 @@ public sealed class MqttTransport : ITransport, IDisposable
     public bool CanSend => _options.DirectionEnum != TransportDirection.Receive;
     public bool CanReceive => _options.DirectionEnum != TransportDirection.Send;
     public event Func<DataMessage, Task>? MessageReceived;
+
+    public MqttTransport(IConfigurationSection section, ILogger<MqttTransport> logger, ILoggerFactory loggerFactory)
+        : this(section.Get<MqttOptions>() ?? new MqttOptions(), logger, loggerFactory)
+    {
+        _options.Name = string.IsNullOrWhiteSpace(_options.Name) || _options.Name == "mqtt"
+            ? section.Key
+            : _options.Name;
+    }
 
     public MqttTransport(MqttOptions options, ILogger<MqttTransport> logger, ILoggerFactory loggerFactory)
     {
@@ -57,7 +62,7 @@ public sealed class MqttTransport : ITransport, IDisposable
 
         if (!_options.Enabled || string.IsNullOrWhiteSpace(_options.Topic))
         {
-            return; // Not configured as a listener
+            return;
         }
 
         if (string.IsNullOrWhiteSpace(_options.BrokerHost))
@@ -66,7 +71,7 @@ public sealed class MqttTransport : ITransport, IDisposable
             return;
         }
 
-        _logger.LogInformation("MqttTransport starting listener on {Host}:{Port}, topic: {Topic}", 
+        _logger.LogInformation("MqttTransport starting listener on {Host}:{Port}, topic: {Topic}",
             _options.BrokerHost, _options.BrokerPort, _options.Topic);
 
         await ConnectReceiverAsync(cancellationToken);

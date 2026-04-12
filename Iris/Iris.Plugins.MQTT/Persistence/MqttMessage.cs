@@ -1,4 +1,6 @@
-namespace Iris.Persistence;
+using Iris.Persistence;
+
+namespace Iris.Plugins.MQTT.Persistence;
 
 /// <summary>
 /// Represents an MQTT message stored in the persistent message store.

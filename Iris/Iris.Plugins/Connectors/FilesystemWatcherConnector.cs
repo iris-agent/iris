@@ -23,7 +23,7 @@ public sealed class FilesystemWatcherConnector : IConnector, IDisposable
     public ITransport? Transport { get; }
     public event Func<DataMessage, Task>? MessageReceived;
 
-    public FilesystemWatcherConnector(FilesystemWatcherOptions options, ITransport? transport, ILogger<FilesystemWatcherConnector> logger)
+    public FilesystemWatcherConnector(FilesystemWatcherOptions options, ILogger<FilesystemWatcherConnector> logger, ITransport? transport)
     {
         _options = options;
         Transport = transport;

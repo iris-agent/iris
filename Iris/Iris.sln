@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iris.Plugins", "Iris.Plugin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iris.Plugins.Contracts", "Iris.Plugins.Contracts\Iris.Plugins.Contracts.csproj", "{F8349111-6C9D-5AE4-A718-BBC1CDD183CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iris.Plugins.MQTT", "Iris.Plugins.MQTT\Iris.Plugins.MQTT.csproj", "{F6964F4C-8C7F-4A82-815C-006F97661B30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{F8349111-6C9D-5AE4-A718-BBC1CDD183CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8349111-6C9D-5AE4-A718-BBC1CDD183CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8349111-6C9D-5AE4-A718-BBC1CDD183CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6964F4C-8C7F-4A82-815C-006F97661B30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6964F4C-8C7F-4A82-815C-006F97661B30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6964F4C-8C7F-4A82-815C-006F97661B30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6964F4C-8C7F-4A82-815C-006F97661B30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
